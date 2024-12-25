@@ -1,3 +1,4 @@
 /rf_model.pkl
 /lgbm_model.pkl
 /xgboost_model.pkl
+/rf_best_model.pkl
