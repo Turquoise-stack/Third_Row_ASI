@@ -2,3 +2,4 @@
 /lgbm_model.pkl
 /xgboost_model.pkl
 /rf_best_model.pkl
+/best_pycaret_model.pkl
