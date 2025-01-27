@@ -7,4 +7,4 @@ plotly
 scikit-learn
 xgboost
 lightgbm
-fastapi
+fastapi[standard]
