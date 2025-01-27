@@ -1,0 +1,53 @@
+---
+- name: Configure environment
+  hosts: liver-1
+  become: true
+  tasks:
+    - name: Install pip on Alpine
+      ansible.builtin.package:
+        name: py3-pip
+        state: present
+      when: ansible_facts['os_family'] | lower == 'alpine'
+
+    - name: Install modules dependencies
+      ansible.builtin.package:
+        name: py3-requests
+        state: present
+      when: ansible_facts['os_family'] | lower == 'alpine'
+
+- name: ASI liver disease app deployment
+  hosts: liver-1
+  vars:
+    image_name: traimage:333
+    image_path: tra-image.tar
+  tasks:
+    - name: Export an image as tarball
+      community.docker.docker_image_export:
+        name: "{{ image_name }}"
+        path: "{{ image_path }}"
+      run_once: true
+      delegate_to: localhost
+      
+    - name: Copy tarball with owner and permission, using symbolic represantation
+      ansible.builtin.copy:
+        src: "{{ image_path }}"
+        dest: "{{ image_path }}"
+        mode: u=rw,g=r,o=r
+
+    - name: Load liver disease app from the given tar file
+      community.docker.docker_image_load:
+        path: "{{ image_path }}"
+        timeout: 600
+      become: true
+
+    - name: Start container with the app
+      community.docker.docker_container:
+        name: liver-disease-app
+        image: "{{ image_name }}"
+        state: started
+        recreate: true
+        published_ports:
+          - "8000:8000"
+        volumes:
+          - models
+      become: true
